@@ -17,6 +17,9 @@ service: aws-serverless-s3-trigger # NOTE: update this with your service name
 # Check out our docs for more details
 frameworkVersion: ">1.1.0 <2.0.0"
 
+custom:
+  bucket: comment-inbox
+
 plugins:
   - serverless-offline
 
@@ -28,6 +31,13 @@ provider:
   profile: production
   memorySize: 512
   timeout: 10
+  environment: 
+    API_BASE_PATH: http://jsonplaceholder.typicode.com
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -62,6 +72,8 @@ functions:
   getComment:
     handler: handler.comment
     description: This function used to fetch a comment from fakeAPI and write a content in file and upload it on s3 bucket
+    environment:
+      BUCKET: ${self:custom.bucket}
     memorySize: 512
     timeout: 10
     events:
@@ -70,6 +82,7 @@ functions:
           method: get
           cors: true
           private: false
+    
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
